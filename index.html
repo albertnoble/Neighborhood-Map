@@ -1,0 +1,52 @@
+<html>
+<head>
+<script src="js/libs/jquery.min.js"></script>
+<link rel="stylesheet" href="css/style.css">
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+
+<!-- Knockout.js -->
+<script type='text/javascript' src='js/knockout-3.4.2.js'></script>
+</head>
+<body>
+
+<div class="container-fluid">
+    <header class="row">
+        <div class="col-sm-12">
+            <h1>Neighborhood Burger Joints</h1>
+        </div>
+    </header>
+    <div class="row content main">
+        <div class="col-sm-4 sidenav">
+            <h2>Burger Joints</h2>
+            <ul data-bind="foreach: catList">
+                <li data-bind="text: title"></li>
+            </ul>
+        </div>
+        <div id="map" class="col-sm-8"></div>
+    </div>
+    <footer class="row">
+        <div class="col-sm-12">
+            testing
+        </div>
+    </footer>
+</div>
+
+
+
+
+
+
+
+<!--<script type="text/javascript" src="js/script.js"></script>-->
+
+
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCkRsl6APKgFFDnwBhHDe0GEo-eJNqdA3Q&v=3&callback=initMap"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/model/model.js"></script>
+<script type="text/javascript" src="js/script.js"></script>
+</body>
+</html>

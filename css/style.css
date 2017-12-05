@@ -1,0 +1,49 @@
+* {
+    font-family: "Comic Sans MS", cursive, sans-serif;
+}
+
+header {
+    padding: 25px;
+    background-color:#E6E6FA;
+}
+
+.sidenav {
+    background-color:#F0F8FF;
+}
+
+div.cat {
+    padding: 25px;
+    float: left;
+}
+
+img#cat-pic {
+    border-radius: 25px;
+    width: 400px;
+}
+
+ul {
+  list-style-type: none;
+}
+
+img.smallpic {
+    width: 150px;
+    padding: 5px;
+    border-radius:10px;
+}
+
+img#toppic {
+    width: 100px;
+}
+
+#myPopup {
+    display: none;
+    position: absolute;
+    z-index: 1;
+    background-color:white;
+    right: 50px;
+    padding: 15px;
+    border-radius:10px;
+}
+
+
+.row.content {height: 450px}
