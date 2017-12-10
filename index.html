@@ -19,10 +19,12 @@
     </header>
     <div class="row content main">
         <div class="col-sm-4 sidenav">
+            <input type="text" class="filter" data-bind="textInput: userName">
             <h2>Burger Joints</h2>
             <ul data-bind="foreach: catList">
-                <li data-bind="text: title"></li>
+                <li data-bind="attr:{id: title},text: title"></li>
             </ul>
+            <div data-bind="text: filter"></div>
         </div>
         <div id="map" class="col-sm-8"></div>
     </div>

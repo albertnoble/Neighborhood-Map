@@ -47,3 +47,7 @@ img#toppic {
 
 
 .row.content {height: 450px}
+
+.filter {
+    width:100%;
+}
