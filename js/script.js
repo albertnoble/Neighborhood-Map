@@ -2,6 +2,7 @@ var map;
 var markers = [];
 var currentMarker;
 
+
 function initMap() {
     
 
@@ -117,6 +118,7 @@ function initMap() {
             
             marker.addListener('click', function(){
                 populateInfoWindow(this, infowindow);
+                populateWikiArticles(this);
             });
             
             marker.addListener('click', function(){
@@ -152,12 +154,29 @@ function initMap() {
         
         showListings();
         
-        for(var i = 0; i < markers.length; i++){
-            //document.getElementById(markers[i].title).addEventListener('click',animateds(markers[i]));
-        }
-        
-        function animateds(marker){
-            alert("hello");
+        function populateWikiArticles(marker){
+            //Wikipedia API
+            var wikiUrl = 'http://en.wikipedia.org/w/api.php?action=opensearch&search='+ marker.title +'&format=json&callback=wikiCallback';
+
+            //error handling
+            var wikiRequestTimeout = setTimeout(function(){
+                document.getElementById('wiki').innerHTML = "<li>failed to get wikipedia resources</li>";
+            },8000);
+            
+            $.ajax(wikiUrl, {
+                dataType: "jsonp",
+                success: function(response){
+                    var articles = response[1];
+                    document.getElementById('wiki').innerHTML = "";
+                    for (var i = 0; i < articles.length; i++){
+                        article = articles[i];
+                        var url = 'http://en.wikipedia.org/wiki/'+article;
+                        document.getElementById('wiki').innerHTML += '<li><a href="'+url+'">'+article+'</a></li>';
+                    }
+                    
+                    clearTimeout(wikiRequestTimeout);
+                }
+            });
         }
         
         
@@ -206,7 +225,6 @@ var catView = function(){
         
     }, this);
     
-    
 };
 
 var Cat = function(data){
@@ -217,3 +235,9 @@ var Cat = function(data){
 };
 
 ko.applyBindings(new catView());
+
+
+
+
+
+
