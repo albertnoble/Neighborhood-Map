@@ -1,3 +1,6 @@
+/**
+*Information on the Burger Joints
+*/
 var locations = [
     {title: 'McDonalds', location: {lat: 34.419918, lng: -117.286249}},
     {title: 'Burger King', location: {lat: 34.419890, lng: -117.291518}},

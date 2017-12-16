@@ -3,8 +3,10 @@ var markers = [];
 var currentMarker;
 
 
+/**
+*@description Initializes the Google Maps Api
+*/
 function initMap() {
-    
 
         map = new google.maps.Map(document.getElementById('map'),{
             center: {lat: 34.427134, lng: -117.304337},
@@ -92,6 +94,7 @@ function initMap() {
             
         });
         
+        //Change icon to a burger
         var iconBase = 'images/burger.png';
         var icons = {
           burger: {
@@ -99,7 +102,7 @@ function initMap() {
           }
         };
         
-       
+        //Populate the markers variable with the locations from the model
         for (var i = 0; i < locations.length; i++) {
           
             var position = locations[i].location;
@@ -126,6 +129,11 @@ function initMap() {
             });
         }
         
+        /**
+        *@description Adds info window to a marker
+        *@param {object} marker - The restaurant marker
+        *@param {object} infowindow - The Google API infowindow
+        */
         function populateInfoWindow(marker, infowindow) {
             if (marker != currentMarker){
                 currentMarker = marker;
@@ -144,16 +152,34 @@ function initMap() {
             }   
         }
         
+        /**
+        *@description Makes the marker bounce
+        *@param {object} marker - The restaurant marker
+        */
         function bounceMarkers(marker){
             for (var i = 0; i < markers.length; i++){
                 markers[i].setAnimation(null);
             }
-            marker.setAnimation(google.maps.Animation.BOUNCE);
-            
+                marker.setAnimation(google.maps.Animation.BOUNCE);
+                    
         }
         
-        showListings();
+        //Adds event listeners to the list of restaurants
+        var lists = document.getElementsByClassName("rest-list");
+        for (let i = 0; i < lists.length; i++){
+            lists[i].addEventListener('click', function(){
+                bounceMarkers(markers[i]);
+                populateInfoWindow(markers[i], infowindow);
+                populateWikiArticles(markers[i]);
+            });
+        }
         
+        showRestaurants();
+        
+        /**
+        *@description Populates the Wiki Articles section with info on the selected restaurant
+        *@param {object} marker - The restaurant marker
+        */
         function populateWikiArticles(marker){
             //Wikipedia API
             var wikiUrl = 'http://en.wikipedia.org/w/api.php?action=opensearch&search='+ marker.title +'&format=json&callback=wikiCallback';
@@ -178,11 +204,12 @@ function initMap() {
                 }
             });
         }
-        
-        
 }
 
-function showListings() {
+/**
+*@description Adds the markers to the map
+*/
+function showRestaurants() {
         var bounds = new google.maps.LatLngBounds();
         // Extend the boundaries of the map for each marker and display the marker
         for (var i = 0; i < markers.length; i++) {
@@ -192,25 +219,20 @@ function showListings() {
         map.fitBounds(bounds);
 }
 
-
-
-
-
-var catView = function(){
+var RestaurantView = function(){
     var self = this;
     
-    this.catList = ko.observableArray([]);
+    this.restaurantList = ko.observableArray([]);
     
     this.userName = ko.observable("");
     
     this.currentLocations = ko.observableArray([]);
     
-    locations.forEach(function(catItem){
-        self.catList.push(new Cat(catItem));
-        
-        
+    locations.forEach(function(item){
+        self.restaurantList.push(new Restaurant(item));
     });
     
+    //filters the markers on the map according to the filter input field
     this.filter = ko.computed(function(){
         var filt = this.userName().toLowerCase();
         for(var i = 0; i < markers.length; i++){
@@ -219,25 +241,20 @@ var catView = function(){
             }else{
                 markers[i].setMap(map);
             }
-        }
-        
-        
-        
+        }   
     }, this);
     
 };
 
-var Cat = function(data){
+/**
+*@description Creates a Restaurant observable object
+*@param {object} data - The restaurant object from the model
+*/
+var Restaurant = function(data){
     
     this.title = ko.observable(data.title);
     this.location = ko.observable(data.location);
 
 };
 
-ko.applyBindings(new catView());
-
-
-
-
-
-
+ko.applyBindings(new RestaurantView());
