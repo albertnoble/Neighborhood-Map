@@ -1,6 +1,8 @@
 var map;
 var markers = [];
 var currentMarker;
+var infowindow;
+var wikiarticles;
 
 
 /**
@@ -115,7 +117,7 @@ function initMap() {
                 id: i,
                 icon: icons['burger'].icon,
             });
-            var infowindow = new google.maps.InfoWindow();
+            infowindow = new google.maps.InfoWindow();
         
             markers.push(marker);
             
@@ -129,94 +131,56 @@ function initMap() {
             });
         }
         
-        /**
-        *@description Adds info window to a marker
-        *@param {object} marker - The restaurant marker
-        *@param {object} infowindow - The Google API infowindow
-        */
-        function populateInfoWindow(marker, infowindow) {
-            if (marker != currentMarker){
-                currentMarker = marker;
-                infowindow.marker = marker;
-                infowindow.setContent('<div>'+ marker.title +'</div>');
-                infowindow.open(map, marker);
-                infowindow.addListener('closeclick',function(){
-                    for (var i = 0; i < markers.length; i++){
-                        markers[i].setAnimation(null);
-                    }
-                    currentMarker = null;
-                });
-            }else{
-                infowindow.close(map, marker);
-                currentMarker = null;
-            }   
-        }
+        showRestaurants();
         
-        /**
-        *@description Makes the marker bounce
-        *@param {object} marker - The restaurant marker
-        */
-        function bounceMarkers(marker){
+}
+
+/**
+*@description Makes the marker bounce
+*@param {object} marker - The restaurant marker
+*/
+ function bounceMarkers(marker){
+    for (var i = 0; i < markers.length; i++){
+        markers[i].setAnimation(null);
+    }
+    marker.setAnimation(google.maps.Animation.BOUNCE);
+                    
+}
+
+/**
+*@description Adds info window to a marker
+*@param {object} marker - The restaurant marker
+*@param {object} infowindow - The Google API infowindow
+*/
+function populateInfoWindow(marker, infowindow) {
+    if (marker != currentMarker){
+        currentMarker = marker;
+        infowindow.marker = marker;
+        infowindow.setContent('<div>'+ marker.title +'</div>');
+        infowindow.open(map, marker);
+        infowindow.addListener('closeclick',function(){
             for (var i = 0; i < markers.length; i++){
                 markers[i].setAnimation(null);
             }
-                marker.setAnimation(google.maps.Animation.BOUNCE);
-                    
-        }
-        
-        //Adds event listeners to the list of restaurants
-        var lists = document.getElementsByClassName("rest-list");
-        for (let i = 0; i < lists.length; i++){
-            lists[i].addEventListener('click', function(){
-                bounceMarkers(markers[i]);
-                populateInfoWindow(markers[i], infowindow);
-                populateWikiArticles(markers[i]);
-            });
-        }
-        
-        showRestaurants();
-        
-        /**
-        *@description Populates the Wiki Articles section with info on the selected restaurant
-        *@param {object} marker - The restaurant marker
-        */
-        function populateWikiArticles(marker){
-            //Wikipedia API
-            var wikiUrl = 'http://en.wikipedia.org/w/api.php?action=opensearch&search='+ marker.title +'&format=json&callback=wikiCallback';
-
-            //error handling
-            var wikiRequestTimeout = setTimeout(function(){
-                document.getElementById('wiki').innerHTML = "<li>failed to get wikipedia resources</li>";
-            },8000);
-            
-            $.ajax(wikiUrl, {
-                dataType: "jsonp",
-                success: function(response){
-                    var articles = response[1];
-                    document.getElementById('wiki').innerHTML = "";
-                    for (var i = 0; i < articles.length; i++){
-                        article = articles[i];
-                        var url = 'http://en.wikipedia.org/wiki/'+article;
-                        document.getElementById('wiki').innerHTML += '<li><a href="'+url+'">'+article+'</a></li>';
-                    }
-                    
-                    clearTimeout(wikiRequestTimeout);
-                }
-            });
-        }
+            currentMarker = null;
+        });
+    }else{
+        infowindow.close(map, marker);
+        currentMarker = null;
+    }   
 }
 
 /**
 *@description Adds the markers to the map
 */
 function showRestaurants() {
-        var bounds = new google.maps.LatLngBounds();
-        // Extend the boundaries of the map for each marker and display the marker
-        for (var i = 0; i < markers.length; i++) {
-          markers[i].setMap(map);
-          bounds.extend(markers[i].position);
-        }
-        map.fitBounds(bounds);
+    var bounds = new google.maps.LatLngBounds();
+    // Extend the boundaries of the map for each marker and display the marker
+    for (var i = 0; i < markers.length; i++) {
+      markers[i].setMap(map);
+      bounds.extend(markers[i].position);
+    }
+    map.fitBounds(bounds);
 }
 
 var RestaurantView = function(){
@@ -225,6 +189,8 @@ var RestaurantView = function(){
     this.restaurantList = ko.observableArray([]);
     
     this.userName = ko.observable("");
+    
+    wikiarticles = ko.observable("");
     
     this.currentLocations = ko.observableArray([]);
     
@@ -241,8 +207,28 @@ var RestaurantView = function(){
             }else{
                 markers[i].setMap(map);
             }
-        }   
+        }
+        
+        self.restaurantList.removeAll();
+        locations.forEach(function(item){
+            if (item.title.toLowerCase().indexOf(filt) != -1){
+                self.restaurantList.push(new Restaurant(item));
+            }
+        });
+        
     }, this);
+    
+    this.targetLocation = function(){
+        for (var i = 0; i < self.restaurantList().length; i++){
+            if (self.restaurantList()[i] == this){
+                bounceMarkers(markers[i]);
+                populateInfoWindow(markers[i], infowindow);
+                populateWikiArticles(markers[i]);
+                
+            }
+        }
+        
+    }
     
 };
 
@@ -258,3 +244,35 @@ var Restaurant = function(data){
 };
 
 ko.applyBindings(new RestaurantView());
+
+/**
+*@description Populates the Wiki Articles section with info on the selected restaurant
+*@param {object} marker - The restaurant marker
+*/
+function populateWikiArticles(marker){
+    //Wikipedia API
+    var wikiUrl = 'http://en.wikipedia.org/w/api.php?action=opensearch&search='+ marker.title +'&format=json&callback=wikiCallback';
+    
+    wikiarticles('');
+    
+    $.ajax(wikiUrl, {
+        dataType: "jsonp",
+        success: function(response){
+            var articles = response[1];
+            for (var i = 0; i < articles.length; i++){
+                article = articles[i];
+                var url = 'http://en.wikipedia.org/wiki/'+article;
+                wikiarticles(wikiarticles()+'<li><a href="'+url+'">'+article+'</a></li>');
+            }
+        }
+    }).fail(function(xhr, status, errorThrown){
+        wikiarticles('<li>Could not load Wikipedia articles</li>');
+    });
+}
+
+/**
+*@description Error handling function for google maps
+*/
+function googleError(){
+        document.getElementById('map').innerHTML += '<p>Google Maps could not load</p>';
+}
